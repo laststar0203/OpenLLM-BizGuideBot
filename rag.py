@@ -115,7 +115,11 @@ def main():
         
         st.session_state.processComplete = True
         
-
+    
+    if 'message' not in st.session_state:
+        st.session_state['messages'] = [{"role": "assistant",
+                                         "content": "안녕하세요! 주어진 문서에 대해 궁금하신 것이 있으면 언제든 물어봐주세요!"}]
+    
     def format_docs(docs):
         # 검색한 문서 결과를 하나의 문단으로 합쳐줍니다.
         return "\n\n".join(doc.page_content for doc in docs)
@@ -130,7 +134,7 @@ def main():
     
     print_history()
     
-    if user_input := st.chat_input("질문을 입력해주세요."):
+    if user_input := st.chat_input("메시지를 입력해 주세요."):
         # 사용자가 입력한 내용
         add_history("user", user_input)
         st.chat_message("user").write(f"{user_input}")
