@@ -19,7 +19,6 @@ from langchain_core.runnables import RunnablePassthrough
 from langserve import RemoteRunnable
 
 
-
 def tiktoken_len(text):
     tokenizer = tiktoken.get_encoding("cl100k_base")
     tokens = tokenizer.encode(text)
@@ -30,7 +29,9 @@ def get_text(docs):
     doc_list = []
     
     for doc in docs:
+        
         file_name = doc.name 
+
         with open(file_name, 'wb') as file:
             file.write(doc.getvalue())
             logger.info(f"Uploaded {file_name}")
@@ -46,6 +47,7 @@ def get_text(docs):
             documents = loader.load_and_split()
         
         doc_list.extend(documents)
+
     return doc_list
 
 def get_text_chunks(text):
@@ -180,7 +182,9 @@ def main():
                     chunks.append(chunk)
                     chat_container.markdown("".join(chunks))
                 add_history("ai", "".join(chunks))
-                
+
+
+
 if __name__ == "__main__":
     main()
             
