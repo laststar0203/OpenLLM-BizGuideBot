@@ -7,7 +7,7 @@ from langchain_community.chat_models import ChatOllama
 
 
 # Langchain이 지원하는 다른 채팅 모델을 사용합니다. 여기서는 Ollama를 사용합니다.
-llm = ChatOllama(model="Llama3_ko_8b_q5:latest", temperature=0) 
+llm = ChatOllama(model="lime-bot-8b:latest", temperature=0) 
 
 app = FastAPI()
 

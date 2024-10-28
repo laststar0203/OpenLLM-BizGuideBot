@@ -1,12 +1,14 @@
 FROM Q5_K_M.gguf
 
-TEMPLATE """{{- if. System }}
+TEMPLATE """{{- if .System }}
 <s>{{ .System }}</s>
 {{- end }}
 <s>Human:
 {{ .Prompt }}</s>
 <s>Assistant:
 """
+
+SYSTEM """A chat between a curious user and artifical intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user's questions."""
 
 PARAMETER stop <s>
 PARAMETER stop </s>
