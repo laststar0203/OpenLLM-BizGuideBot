@@ -32,7 +32,7 @@ class ChatApp:
         #self.llm_url = "https://incredibly-mature-vulture.ngrok-free.app/llm/"
         
         
-        self.llm = RemoteRunnable(config.llm_url)
+        self.llm = RemoteRunnable(config['llm_url'])
         self.setup_session_state()
         self.setup_page()
 
