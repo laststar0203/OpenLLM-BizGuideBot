@@ -42,7 +42,7 @@ def convert_qna_to_csv(Q, A, input_file, save_file):
             sys.exit(1)
         
         # 데이터프레임 전처리
-        df['text'] = df.apply(lambda row: f"<s>[INST] {row[Q]} [/INST] {row[A]} </s>", axis=1)
+        df['text'] = df.apply(lambda row: f"<s>[INST] {row[Q].strip()} [/INST] {row[A].strip()} </s>", axis=1)
         
         # 결과 저장 (utf-8로 인코딩, 인덱스 제거)
         df[['text']].to_csv(save_file, index=False, encoding='utf-8')
