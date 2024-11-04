@@ -2,7 +2,7 @@ from app.chat_app import ChatApp
 
 def main():
     app = ChatApp({
-        "llm_url": "http://localhost:58888/llm/"
+        "llm_url": "https://incredibly-mature-vulture.ngrok-free.app/llm/"
     })
     app.run()
 
