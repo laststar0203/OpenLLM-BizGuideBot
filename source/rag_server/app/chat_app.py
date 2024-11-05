@@ -1,7 +1,7 @@
 # app/chat_app.py
 
 import streamlit as st
-from source.rag_server.processor.file_processor import FileProcessor
+from processor.file_processor import FileProcessor
 from processor.text_processor import TextProcessor
 from processor.vector_store import VectorStoreManager
 
