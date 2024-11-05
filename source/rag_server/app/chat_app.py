@@ -1,7 +1,7 @@
 # app/chat_app.py
 
 import streamlit as st
-from processor.file_processor import FileProcessor
+from source.rag_server.processor.file_processor import FileProcessor
 from processor.text_processor import TextProcessor
 from processor.vector_store import VectorStoreManager
 
@@ -12,7 +12,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langserve import RemoteRunnable
 
 
-RAG_PROMPT_TEMPLATE = """당신은 라임에스엔씨 안내 챗봇 라임봇입니다.
+RAG_PROMPT_TEMPLATE = """당신은 라임에스엔씨 안내 AI 챗봇 라임봇입니다.
 검색된 문맥을 사용하여 질문에 맞는 답변을 하세요.
 답을 모른다면 모른다고 답변하세요.
 Question: {question}
@@ -31,6 +31,7 @@ class ChatApp:
 
         #self.llm_url = "https://incredibly-mature-vulture.ngrok-free.app/llm/"
         
+        self.DOCUMENT_DIR = config['document_dir']
         
         self.llm = RemoteRunnable(config['llm_url'])
         self.setup_session_state()
@@ -52,7 +53,7 @@ class ChatApp:
         
         if "messages" not in st.session_state or not st.session_state["messages"]:
             st.session_state["messages"] = [{"role": "assistant",
-                                             "content": "안녕하세요! 주어진 문서에 대해 궁금하신 것이 있으면 언제든 물어봐주세요!"}]
+                                             "content": "안녕하세요! 저는 라임에스엔씨의 AI 안내 챗봇 라임봇입니다. 무엇을 도와드릴까요?"}]
 
     def setup_page(self):
 
@@ -81,10 +82,17 @@ class ChatApp:
             process = st.button("Process")
 
         if process:
-            files_text = self.file_processor.get_text(uploaded_files)
+            
+            # run() 재실행되므로 이전 메모리 저장 삭제 
+            self.file_processor.clear()
+            self.file_processor.add_directory(self.DOCUMENT_DIR)
+            self.file_processor.add_streamlit_upload_files(uploaded_files)
+            files_text = self.file_processor.get_text()
+            
             text_chunks = self.text_processor.get_text_chunks(files_text)
             vectorestore = self.vector_store_manager.get_vectorstore(text_chunks)
             retriever = vectorestore.as_retriever(search_type='mmr', verbose=True)
+            
             st.session_state['retriever'] = retriever
             st.session_state['processComplete'] = True
 
