@@ -5,6 +5,9 @@ from langserve import add_routes
 
 from langchain_community.chat_models import ChatOllama
 
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 # Langchain이 지원하는 다른 채팅 모델을 사용합니다. 여기서는 Ollama를 사용합니다.
 llm = ChatOllama(model="lime-bot-8b:latest", temperature=0) 
@@ -16,6 +19,12 @@ app = FastAPI()
 async def redirect_root_to_docs():
     return RedirectResponse("/docs")
 
+@app.middleware("http")
+async def log_prompt_request(request, call_next):
+    body = await request.json()
+    logging.info(f"Received prompt request: {body}")
+    response = await call_next(request)
+    return response
 
 app.add_middleware(
     CORSMiddleware,

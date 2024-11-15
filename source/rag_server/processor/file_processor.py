@@ -1,6 +1,6 @@
 import os
 from loguru import logger
-from langchain.document_loaders import PyPDFLoader, Docx2txtLoader, UnstructuredPowerPointLoader
+from langchain.document_loaders import PyPDFLoader, Docx2txtLoader, UnstructuredPowerPointLoader, TextLoader
 
 class FileProcessor:
     
@@ -9,9 +9,7 @@ class FileProcessor:
     
     def add_file(self, doc_path: str):
         self._doc_list.append(doc_path)
-        
-    def add_streamlit_upload_files(self, docs):
-        self._doc_list.extend([doc.name for doc in docs])
+
     
     def add_directory(self, dir_path: str):
         for filename in os.listdir(dir_path):
@@ -27,23 +25,21 @@ class FileProcessor:
         
         result = []
         
-        for doc in self._doc_list:
-            file_name = doc.name
+        for doc_name in self._doc_list:
+            file_name = doc_name
 
-            with open(file_name, 'wb') as file:
-                file.write(doc.getvalue())
-                logger.info(f"Uploaded {file_name}")
-
-            if ".pdf" in doc.name:
+            if ".pdf" in doc_name:
                 loader = PyPDFLoader(file_name)
-            elif '.docx' in doc.name:
+            elif '.docx' in doc_name:
                 loader = Docx2txtLoader(file_name)
-            elif '.pptx' in doc.name:
+            elif '.pptx' in doc_name:
                 loader = UnstructuredPowerPointLoader(file_name)
+            elif '.txt' in doc_name:
+                loader = TextLoader(file_name)
             else:
                 continue  # 지원하지 않는 파일 형식은 무시
 
             documents = loader.load_and_split()
             result.extend(documents)
-
+        
         return result

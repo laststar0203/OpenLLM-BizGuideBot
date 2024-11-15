@@ -8,6 +8,6 @@ class VectorStoreManager:
             model_kwargs={'device': 'cpu'},
             encode_kwargs={'normalize_embeddings': True}
         )
-
+        
         vectordb = FAISS.from_documents(text_chunks, embeddings)
         return vectordb
