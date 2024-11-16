@@ -30,15 +30,13 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 # logging.basicConfig(level=logging.DEBUG)
 
 RAG_SYSTEM_PROMPT_TEMPLATE = """
-당신은 라임에스엔씨의 안내 AI 챗봇, 라임봇입니다. 다음 지침에 따라 정확하고 간결하게 응답하세요:
+질문-답변 업무를 돕는 보조원입니다. 아래 요구에 따라 적합한 응답을 하세요
 
-Instruction:
-1. 제공된 문맥(Context)를 기반으로 질문(Question)에 가장 적합한 답변(Answer)을 작성합니다.
-2. 질문(Question)이 '라임에스엔씨'와 무관하거나, 문맥(Context)과 관련이 없는 경우 반드시 다음과 같이 응답하세요:
-   - "죄송합니다. 해당 질문에 대한 답변을 제공할 수 없습니다."
-3. 모든 답변(Answer)은 공손하고 전문적인 어조로 작성합니다.
-4. 질문(Question)에 대해서 반드시 '라임에스엔씨'랑 엮어서 답변(Answer) 하려고 하지 마세요
-5. 불필요한 설명은 피하고, 질문에 대한 간결한 답변(Answer)을 우선적으로 제공합니다.
+- Question이 Context와 관련이 없는 경우 "죄송합니다. 해당 질문에 대한 답변을 제공할 수 없습니다." 라고 응답하세요
+- Question이 '라임에스엔씨'와 관련이 없는 경우 "죄송합니다. 해당 질문에 대한 답변을 제공할 수 없습니다." 라고 응답하세요
+- 모든 답변은 공손하고 전문적인 어조로 응답하세요.
+- Question이 Context와 관련이 없는 경우 Question 내용에 대한 답변만 하세요.
+
 
 Context: {context}
 """
@@ -49,6 +47,7 @@ UNRAG_SYSTEM_PROMPT_TEMPLATE = """
 답을 모른다면 모른다고 답변하세요.
 """
 
+# depreacated
 HUMAN_PROMPT_TEMPLATE = """
 Question: {input}
 Answer:"""
@@ -143,19 +142,18 @@ class ChatApp:
                 
                 chat_container = st.empty()
 
-                if st.session_state['ragActive']:
-                
-                    # Contextulize question
+                if st.session_state['ragActive']:                   
                     
+                    # Contextulize question
                     contextualize_q_prompt = ChatPromptTemplate.from_messages(
                         [
-                            SystemMessagePromptTemplate.from_template("""채팅 기록과 최근 사용자 질문이 주어졌을 때, 채팅 기록의 맥락을 참조할 수 있는 최근 질문을, 채팅 기록 없이도 이해할 수 있는 독립적인 질문으로 재구성하세요. 질문에 답하지 말고, 필요하다면 질문을 재구성하고 그렇지 않으면 그대로 반환하세요."""),
+                            SystemMessagePromptTemplate.from_template("이전 대화 내용과 최신 사용자 질문이 있을 때, 이 질문이 이전 대화 내용과 관련이 있을 수 있습니다. 이런 경우, 대화 내용을 알 필요 없이 독립적으로 이해할 수 있는 질문으로 바꾸세요. 질문에 답할 필요는 없고, 필요하다면 그저 다시 구성하거나 그대로 두세요."),
                             MessagesPlaceholder(variable_name="history"),
                             HumanMessagePromptTemplate.from_template("{input}")
                         ]
                     )                   
                     
-                    # LLM 도움을 받아 적합한 document를 찾음
+                    # RAG와 이전 history 내용 기반으로 질문을 재구성
                     history_aware_retriever = create_history_aware_retriever(
                         self.llm, retriever, contextualize_q_prompt
                     )
@@ -164,7 +162,7 @@ class ChatApp:
                         [
                             SystemMessagePromptTemplate.from_template(RAG_SYSTEM_PROMPT_TEMPLATE),
                             MessagesPlaceholder(variable_name="history"),
-                            HumanMessagePromptTemplate.from_template(HUMAN_PROMPT_TEMPLATE)
+                            HumanMessagePromptTemplate.from_template("{input}")
                         ]
                     )
                     
@@ -178,7 +176,8 @@ class ChatApp:
                         history_messages_key="history",
                         output_messages_key="answer"
                     )
-                                        
+                    
+                    
                 else:
                     """
                     prompt = ChatPromptTemplate.from_template(UNRAG_PROMPT_TEMPLATE)
